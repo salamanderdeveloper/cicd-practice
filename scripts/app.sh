@@ -8,3 +8,4 @@ add() {
 
 # Run if called directly
 add "$@"
+# small comment
