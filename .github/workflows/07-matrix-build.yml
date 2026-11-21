@@ -1,0 +1,30 @@
+name: 07 - Matrix Build
+
+on:
+  push:
+    paths:
+      - '.github/workflows/07-matrix-build.yml'
+  workflow_dispatch:
+
+jobs:
+  multi-os-test:
+    name: Test on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check operating system details
+        run: |
+          echo "Current Runner OS: ${{ matrix.os }}"
+          echo "Kernel Info: $(uname -s)"
+          echo "Architecture: $(uname -m)"
+
+      - name: Run app test on this OS
+        run: |
+          chmod +x scripts/app.sh tests/run_tests.sh
+          ./tests/run_tests.sh
