@@ -1,0 +1,50 @@
+name: 02 - Variables and Context
+
+on:
+  push:
+  workflow_dispatch:
+
+# 1. Workflow-level environment variable (available to ALL jobs and steps)
+env:
+  PROJECT_NAME: "CI/CD Practice"
+
+jobs:
+  explore-variables:
+    runs-on: ubuntu-latest
+
+    # 2. Job-level environment variable (available to all steps in this job)
+    env:
+      ENVIRONMENT: "Staging"
+
+    steps:
+      # Step 1: Read built-in GitHub Context
+      - name: Print GitHub Context
+        run: |
+          echo "Triggered by user: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Current Branch: ${{ github.ref_name }}"
+          echo "Commit SHA: ${{ github.sha }}"
+
+      # Step 2: Read custom environment variables
+      - name: Print Environment Variables
+        env:
+          # Step-level variable (only available in this step)
+          STEP_ROLE: "Learner"
+        run: |
+          echo "Project: $PROJECT_NAME"
+          echo "Environment: $ENVIRONMENT"
+          echo "Role: $STEP_ROLE"
+
+      # Step 3: Compute a dynamic output
+      - name: Generate Dynamic Output
+        id: build_info
+        run: |
+          BUILD_TIME=$(date +'%Y-%m-%d %H:%M:%S')
+          echo "timestamp=$BUILD_TIME" >> "$GITHUB_OUTPUT"
+          echo "version=v1.0.0" >> "$GITHUB_OUTPUT"
+
+      # Step 4: Consume output from the previous step using step ID
+      - name: Use Outputs From Previous Step
+        run: |
+          echo "Version produced: ${{ steps.build_info.outputs.version }}"
+          echo "Generated at: ${{ steps.build_info.outputs.timestamp }}"
