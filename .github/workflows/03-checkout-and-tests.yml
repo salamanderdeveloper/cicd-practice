@@ -1,0 +1,27 @@
+name: 03 - Checkout and Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Clone the repository onto the runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Verify files exist
+      - name: Check repository files
+        run: |
+          echo "Listing files cloned from repo:"
+          ls -la scripts/
+          ls -la tests/
+
+      # Step 3: Run the tests!
+      - name: Run automated test suite
+        run: |
+          chmod +x scripts/app.sh tests/run_tests.sh
+          ./tests/run_tests.sh
