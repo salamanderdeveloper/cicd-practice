@@ -1,0 +1,22 @@
+name: 05 - Docs Trigger Only
+
+# This workflow ONLY runs when files inside the `docs/` directory are changed!
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/05-selective-triggers.yml'
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and verify documentation
+        run: |
+          echo "Documentation files were changed! Verifying docs..."
+          ls -la docs/
+          echo "Documentation build complete!"
