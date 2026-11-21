@@ -1,0 +1,58 @@
+name: 08 - Build Artifacts
+
+on:
+  push:
+    paths:
+      - '.github/workflows/08-artifacts.yml'
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Build the package and upload artifact
+  build-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create release bundle
+        run: |
+          mkdir -p dist
+          # Bundle scripts into a release archive
+          tar -czf dist/app-release.tar.gz scripts/
+          echo "Created archive: dist/app-release.tar.gz"
+          ls -lh dist/
+
+      # Save the archive to GitHub Artifact Storage
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package # Name of the downloadable artifact
+          path: dist/app-release.tar.gz
+          retention-days: 1     # Keep for 1 day
+
+  # Job 2: Run on a DIFFERENT machine, download the artifact, and verify
+  verify-package:
+    runs-on: ubuntu-latest
+    needs: build-and-package # Wait for Job 1 to finish
+
+    steps:
+      # Notice: We do NOT need to checkout code here!
+      # We download the artifact produced by Job 1 instead!
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-package
+          path: downloaded-release/
+
+      - name: Verify downloaded bundle
+        run: |
+          echo "Downloaded files:"
+          ls -la downloaded-release/
+          # Extract and verify the contents
+          tar -xzf downloaded-release/app-release.tar.gz
+          echo "Extracted files:"
+          ls -la scripts/
+          # Test the extracted script!
+          bash scripts/app.sh 10 20
+          echo "✅ Package verified successfully!"
